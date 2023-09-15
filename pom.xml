@@ -5,13 +5,178 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.multicatch</groupId>
-    <artifactId>kafcache</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>kafcache-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <modules>
+        <module>kafcache</module>
+    </modules>
+    <packaging>pom</packaging>
+
+    <name>kafcache parent</name>
+    <description>Parent project for Kafcache - java cache backed by Kafka, locally supported by SQLite.</description>
+
+    <url>https://github.com/multicatch/kafcache</url>
+    <inceptionYear>2023</inceptionYear>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git@github.com:multicatch/kafcache</connection>
+        <developerConnection>scm:git:git@github.com:multicatch/kafcache.git</developerConnection>
+        <url>https://github.com/multicatch/kafcache/</url>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>multicatch</id>
+            <name>Cezary Regec</name>
+            <email>cezaryre@email.com</email>
+        </developer>
+    </developers>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.3.0</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.10</version>
+                    <configuration>
+                        <fileSets>
+                            <fileSet>
+                                <directory>${project.build.directory}/</directory>
+                                <includes>
+                                    <include>*.exec</include>
+                                </includes>
+                            </fileSet>
+                        </fileSets>
+
+                        <destFile>${project.parent.basedir}/target/merged.exec</destFile>
+                        <dataFile>${project.parent.basedir}/target/merged.exec</dataFile>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>merge</id>
+                            <phase>prepare-package</phase>
+                            <goals>
+                                <goal>merge</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>jacoco-site</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>build-deployment</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.13</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--batch</arg>
+                                        <arg>--yes</arg>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jcenter</id>
+            <name>JCenter</name>
+            <url>https://jcenter.bintray.com/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 
 </project>
